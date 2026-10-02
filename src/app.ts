@@ -1,10 +1,20 @@
 import express from "express";
+import cors from "cors";
 import swaggerUi from "swagger-ui-express";
+import { config } from "./config";
 import { getDailyRates, getLatestRates, getRate } from "./db";
 import { ensureDateRates, localDate } from "./service";
 import { swaggerDocument } from "./swagger";
 
 export const app = express();
+const allowedOrigins = config.CORS_ORIGINS.split(",").map((origin) => origin.trim()).filter(Boolean);
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error("Origen no permitido por CORS."));
+  }
+}));
 app.use(express.json());
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.get("/api-docs.json", (_req, res) => res.json(swaggerDocument));

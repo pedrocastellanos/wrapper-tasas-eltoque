@@ -23,6 +23,13 @@ describe("API", () => {
     expect(response.body.rates).toEqual([{ currency: "USD", cup: 760 }]);
   });
 
+  it("permite solicitudes CORS desde el frontend configurado", async () => {
+    const response = await request(app)
+      .get("/health")
+      .set("Origin", "http://localhost:5173");
+    expect(response.headers["access-control-allow-origin"]).toBe("http://localhost:5173");
+  });
+
   it("si la fecha no existe, consulta la API y guarda el resultado", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(JSON.stringify({ tasas: { USD: 760, EUR: 860 } }), { status: 200, headers: { "content-type": "application/json" } }));
 

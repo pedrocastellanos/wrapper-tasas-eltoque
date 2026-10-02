@@ -45,6 +45,14 @@ TIMEZONE=America/Havana
 
 `RATE_UPDATE_CRON` define la expresión cron para actualizar las tasas automáticamente.
 
+Para permitir solicitudes desde tu frontend, configura los orígenes separados por comas:
+
+```env
+CORS_ORIGINS=http://localhost:5173,https://tu-frontend.com
+```
+
+Por defecto se permite `http://localhost:5173`.
+
 ## API local
 
 ### Última captura almacenada
