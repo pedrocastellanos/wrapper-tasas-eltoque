@@ -4,6 +4,7 @@
   "private": true,
   "description": "API Express + TypeScript para consultar y almacenar diariamente las tasas del mercado informal publicadas por elTOQUE.",
   "main": "dist/server.js",
+  "packageManager": "pnpm@12.4.2",
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
