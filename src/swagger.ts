@@ -96,10 +96,9 @@ export const swaggerDocument = {
     "/api/rates/refresh": {
       post: {
         tags: ["Rates"],
-        summary: "Actualiza manualmente las tasas del día",
+        summary: "Fuerza la consulta a la fuente oficial y actualiza las tasas del día",
         responses: {
-          "200": { description: "Tasas ya estaban almacenadas", content: { "application/json": { schema: { $ref: "#/components/schemas/DailyRates" } } } },
-          "201": { description: "Tasas consultadas y almacenadas", content: { "application/json": { schema: { $ref: "#/components/schemas/DailyRates" } } } },
+          "200": { description: "Tasas consultadas y captura almacenada actualizada (cached: false)", content: { "application/json": { schema: { allOf: [{ $ref: "#/components/schemas/DailyRates" }, { type: "object", properties: { cached: { type: "boolean", example: false } } }] } } } },
           "502": { description: "Error consultando la fuente oficial", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } }
         }
       }

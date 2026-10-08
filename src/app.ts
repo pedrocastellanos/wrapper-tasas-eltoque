@@ -3,7 +3,7 @@ import cors from "cors";
 import swaggerUi from "swagger-ui-express";
 import { config } from "./config";
 import { getDailyRates, getLatestRates, getRate } from "./db";
-import { ensureDateRates, localDate } from "./service";
+import { ensureDateRates, localDate, refreshDateRates } from "./service";
 import { swaggerDocument } from "./swagger";
 
 export const app = express();
@@ -61,11 +61,11 @@ app.get("/api/rates/:currency/:date", async (req, res) => {
   }
 });
 
-// Endpoint operativo para ejecutar la actualización del día manualmente.
+// Consulta la API oficial y reemplaza la captura almacenada de hoy.
 app.post("/api/rates/refresh", async (_req, res) => {
   try {
-    const result = await ensureDateRates(localDate());
-    return res.status(result.fetched ? 201 : 200).json({ ...result.data, cached: !result.fetched });
+    const result = await refreshDateRates(localDate());
+    return res.status(200).json({ ...result.data, cached: false });
   } catch (error) {
     return res.status(502).json({ error: error instanceof Error ? error.message : "Error consultando elTOQUE." });
   }

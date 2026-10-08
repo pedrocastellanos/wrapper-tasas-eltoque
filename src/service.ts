@@ -29,12 +29,7 @@ export function validateDate(value: string): string {
   return value;
 }
 
-export async function ensureDateRates(rateDate: string, now = new Date()) {
-  validateDate(rateDate);
-
-  const cached = getDailyRates(rateDate);
-  if (cached) return { data: cached, fetched: false };
-
+async function fetchAndSaveDateRates(rateDate: string, now: Date) {
   if (running) throw new Error("Ya existe una consulta a la API oficial en ejecución.");
   running = true;
   try {
@@ -49,6 +44,20 @@ export async function ensureDateRates(rateDate: string, now = new Date()) {
   } finally {
     running = false;
   }
+}
+
+export async function ensureDateRates(rateDate: string, now = new Date()) {
+  validateDate(rateDate);
+
+  const cached = getDailyRates(rateDate);
+  if (cached) return { data: cached, fetched: false };
+
+  return fetchAndSaveDateRates(rateDate, now);
+}
+
+export async function refreshDateRates(rateDate: string, now = new Date()) {
+  validateDate(rateDate);
+  return fetchAndSaveDateRates(rateDate, now);
 }
 
 export async function fetchTodayAtNine(now = new Date()) {

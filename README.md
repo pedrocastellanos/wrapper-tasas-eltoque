@@ -106,7 +106,7 @@ GET /api/rates/USD/2026-09-30
 POST /api/rates/refresh
 ```
 
-Si hoy ya existe en BD, no vuelve a consultar la API. Esto evita llamadas duplicadas.
+Siempre consulta la API oficial, aunque ya exista una captura de hoy, y reemplaza los valores almacenados. La respuesta incluye `cached: false` cuando la consulta se realiza correctamente.
 
 ### Health
 

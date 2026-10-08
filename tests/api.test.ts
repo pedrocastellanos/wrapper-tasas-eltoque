@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import request from "supertest";
 import { app } from "../src/app";
 import { db, saveDailyRates } from "../src/db";
+import { localDate } from "../src/service";
 
 describe("API", () => {
   beforeEach(() => {
@@ -49,5 +50,28 @@ describe("API", () => {
     const response = await request(app).get("/api/rates/USD/2026-09-30");
     expect(response.status).toBe(200);
     expect(response.body).toMatchObject({ currency: "USD", cup: 750, cached: true });
+  });
+
+  it("POST /api/rates/refresh consulta la fuente y reemplaza la captura existente", async () => {
+    const today = localDate();
+    saveDailyRates(today, "2026-10-08T13:00:01.440Z", "https://tasas.eltoque.com/v1/trmi", [{ currency: "USD", cup: 765 }], { tasas: { USD: 765 } });
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(JSON.stringify({ tasas: { USD: 770, MLC: 503.04 } }), {
+        status: 200,
+        headers: { "content-type": "application/json" }
+      })
+    );
+
+    const response = await request(app).post("/api/rates/refresh");
+
+    expect(response.status).toBe(200);
+    expect(response.body.cached).toBe(false);
+    expect(response.body.rates).toEqual([
+      { currency: "MLC", cup: 503.04 },
+      { currency: "USD", cup: 770 }
+    ]);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect((await request(app).get("/api/rates")).body.rates).toEqual(response.body.rates);
+    fetchMock.mockRestore();
   });
 });
