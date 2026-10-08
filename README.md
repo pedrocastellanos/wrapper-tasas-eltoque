@@ -8,16 +8,14 @@ La API oficial está documentada con OpenAPI 3.0 y expone `GET /v1/trmi` con aut
 
 ### Actualización diaria
 
-Todos los días a las **09:00**, en la zona horaria configurada (`America/Havana` por defecto), el scheduler consulta: 
+Todos los días a las **09:00**, en la zona horaria configurada (`America/Havana` por defecto), el scheduler consulta la tasa vigente usando el mismo endpoint que la API oficial, sin parámetros de fecha:
 
 ```text
 GET https://tasas.eltoque.com/v1/trmi
 Authorization: Bearer <ELTOQUE_API_KEY>
-date_from=YYYY-MM-DD 00:00:00
-date_to=YYYY-MM-DD HH:MM:SS
 ```
 
-Para el día actual, `date_to` es el momento de la consulta. Así el intervalo siempre es menor de 24 horas.
+Las consultas de fechas históricas sí usan `date_from` y `date_to`; para hoy no se envía un intervalo, de modo que el wrapper solicite los mismos datos actuales que la consulta directa a la API oficial.
 
 El resultado se guarda en SQLite y las consultas normales **no vuelven a llamar a elTOQUE**.
 

@@ -68,9 +68,17 @@ export async function fetchRatesForDate(rateDate: string, now = new Date()): Pro
     throw new ElToqueApiError("ELTOQUE_API_KEY no está configurada.");
   }
 
-  const { dateFrom, dateTo } = buildDateRange(rateDate, now);
-  const params = new URLSearchParams({ date_from: dateFrom, date_to: dateTo });
-  const url = `${config.ELTOQUE_API_URL.replace(/\/$/, "")}/v1/trmi?${params.toString()}`;
+  const endpoint = `${config.ELTOQUE_API_URL.replace(/\/$/, "")}/v1/trmi`;
+  const today = formatApiDate(now).slice(0, 10);
+  let url = endpoint;
+
+  // La consulta sin parámetros es la misma que devuelve la tasa actual en
+  // la API oficial. Los rangos se reservan para solicitar fechas históricas.
+  if (rateDate !== today) {
+    const { dateFrom, dateTo } = buildDateRange(rateDate, now);
+    const params = new URLSearchParams({ date_from: dateFrom, date_to: dateTo });
+    url = `${endpoint}?${params.toString()}`;
+  }
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), config.REQUEST_TIMEOUT_MS);

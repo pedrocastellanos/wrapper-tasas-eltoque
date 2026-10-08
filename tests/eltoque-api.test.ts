@@ -1,5 +1,6 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import { buildDateRange, fetchRatesForDate } from "../src/eltoque-api";
+import { config } from "../src/config";
 
 describe("elTOQUE official API client", () => {
   beforeEach(() => vi.restoreAllMocks());
@@ -27,6 +28,29 @@ describe("elTOQUE official API client", () => {
       Authorization: expect.stringMatching(/^Bearer /),
       Accept: "application/json"
     });
+  });
+
+  it("consulta el endpoint actual sin parámetros para obtener las tasas vigentes", async () => {
+    const now = new Date("2026-10-08T15:14:01.000Z");
+    const today = new Intl.DateTimeFormat("en-CA", {
+      timeZone: config.TIMEZONE,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    }).formatToParts(now).reduce((date, part) => {
+      if (part.type === "year") date.year = part.value;
+      if (part.type === "month") date.month = part.value;
+      if (part.type === "day") date.day = part.value;
+      return date;
+    }, { year: "", month: "", day: "" });
+    const rateDate = `${today.year}-${today.month}-${today.day}`;
+    const mock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(JSON.stringify({ tasas: { USD: 770 } }), { status: 200 })
+    );
+
+    await fetchRatesForDate(rateDate, now);
+
+    expect(mock.mock.calls[0][0]).toBe(`${config.ELTOQUE_API_URL.replace(/\/$/, "")}/v1/trmi`);
   });
 
   it("maneja 429 sin ocultar Retry-After", async () => {
